@@ -220,9 +220,9 @@ local default_config = {
     watching = "NeotestWatching",
   },
   floating = {
-    border = nil,
-    max_height = 0.6,
-    max_width = 0.6,
+    border = "single",
+    max_height = nil,
+    max_width = nil,
     options = {},
   },
   default_strategy = "integrated",

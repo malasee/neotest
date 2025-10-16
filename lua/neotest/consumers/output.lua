@@ -1,6 +1,7 @@
 local nio = require("nio")
 local lib = require("neotest.lib")
 local config = require("neotest.config")
+local ansi = require("neotest.lib.ui.ansi")
 
 local win, short_opened
 
@@ -12,6 +13,8 @@ local function open_output(result, opts)
     end
     return
   end
+  output = ansi.decode_ansi_escapes(output)
+
   local buf = nio.api.nvim_create_buf(false, true)
 
   local chan = lib.ui.open_term(buf)
@@ -76,6 +79,13 @@ local function open_output(result, opts)
     callback = on_close,
   })
   vim.api.nvim_win_set_buf(win, buf)
+
+  -- Map 'q' to close the output window for convenience
+  pcall(vim.keymap.set, "n", "q", function()
+    if vim.api.nvim_win_is_valid(win) then
+      pcall(vim.api.nvim_win_close, win, true)
+    end
+  end, { buffer = buf, nowait = true, silent = true })
 
   if opts.enter then
     vim.api.nvim_set_current_win(win)

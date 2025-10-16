@@ -1,6 +1,7 @@
 local lib = require("neotest.lib")
 local nio = require("nio")
 local OutputPanel = require("neotest.consumers.output_panel.panel")
+local ansi = require("neotest.lib.ui.ansi")
 
 ---@private
 ---@type neotest.OutputPanel
@@ -54,6 +55,7 @@ local init = function(client)
 
     for file, _ in pairs(files_to_read) do
       local output = lib.files.read(file)
+      output = ansi.decode_ansi_escapes(output)
       local dos_newlines = string.find(output, "\r\n") ~= nil
       if
         not pcall(
