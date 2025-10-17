@@ -110,6 +110,27 @@ function M.open(settings)
   ---@type neotest.Float
   local win = Float:new(win_id, position)
 
+  -- Optional built-in close mapping: 'q' in normal/terminal mode
+  if settings.map_close ~= false then
+    local function close_float()
+      win:close(true)
+    end
+    pcall(
+      vim.keymap.set,
+      "n",
+      "q",
+      close_float,
+      { buffer = content_buffer, nowait = true, silent = true }
+    )
+    pcall(
+      vim.keymap.set,
+      "t",
+      "q",
+      close_float,
+      { buffer = content_buffer, nowait = true, silent = true }
+    )
+  end
+
   if settings.auto_close ~= false then
     local function auto_close()
       if not win:is_floating() then

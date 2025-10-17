@@ -2,6 +2,7 @@ local nio = require("nio")
 local lib = require("neotest.lib")
 local config = require("neotest.config")
 local ansi = require("neotest.lib.ui.ansi")
+local links = require("neotest.lib.ui.links")
 
 local win, short_opened
 
@@ -15,6 +16,8 @@ local function open_output(result, opts)
   end
   output = ansi.decode_ansi_escapes(output)
 
+  -- Pre-scan raw output for full file paths with line numbers to avoid truncation due to terminal wrapping
+  local raw_links = links.extract_links_from_text(output)
   local buf = nio.api.nvim_create_buf(false, true)
 
   local chan = lib.ui.open_term(buf)
@@ -64,7 +67,7 @@ local function open_output(result, opts)
         width = win_opts.width,
         height = win_opts.height,
         buffer = buf,
-        auto_close = opts.auto_close,
+        auto_close = (opts.auto_close ~= nil) and opts.auto_close or config.output.auto_close,
       })
       float:listen("close", on_close)
       return float.win_id
@@ -80,12 +83,10 @@ local function open_output(result, opts)
   })
   vim.api.nvim_win_set_buf(win, buf)
 
-  -- Map 'q' to close the output window for convenience
-  pcall(vim.keymap.set, "n", "q", function()
-    if vim.api.nvim_win_is_valid(win) then
-      pcall(vim.api.nvim_win_close, win, true)
-    end
-  end, { buffer = buf, nowait = true, silent = true })
+  -- Place links and setup keymaps/autocmds
+  links.place_links(buf, win, raw_links)
+  links.setup_keymaps(buf, win, { open_in = "tabedit" })
+  links.attach_autocmds(buf, win, raw_links)
 
   if opts.enter then
     vim.api.nvim_set_current_win(win)

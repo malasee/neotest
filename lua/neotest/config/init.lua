@@ -127,6 +127,7 @@ local js_watch_query = [[
 ---@class neotest.Config.output
 ---@field enabled boolean
 ---@field open_on_run string|boolean Open nearest test result after running
+---@field auto_close boolean? Close output window when leaving it, or when cursor moves outside of window
 
 ---@class neotest.Config.state
 ---@field enabled boolean
@@ -270,6 +271,7 @@ local default_config = {
   output = {
     enabled = true,
     open_on_run = "short",
+    auto_close = false,
   },
   output_panel = {
     enabled = true,
